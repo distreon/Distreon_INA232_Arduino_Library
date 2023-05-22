@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <ina232_i2c.h>
 
-using namespace INA232_REG;
+using namespace INA232Reg;
 
 INA232::INA232(A0 addr) { _devAddress = addr; }
 
@@ -9,18 +9,18 @@ void INA232::begin(TwoWire *wirePort) {
     _success = true;
     _wire = wirePort;
     // Attempt to read out manufacturer ID register, should always be 0x5449
-    if (_getReg(MAN_ID::ADDR) == MAN_ID::DEFAULT) {
+    if (_getReg(ManID::addr) == ManID::defaultVal) {
         _hasBegun = true;
 
         // Write out any shadow registers that aren't default
-        if (_shadowRegConfig != CONFIG::DEFAULT) {
-            _setReg(CONFIG::ADDR, _getShadow(CONFIG::ADDR));
+        if (_shadowRegConfig != Config::defaultVal) {
+            _setReg(Config::addr, _getShadow(Config::addr));
         }
-        if (_shadowRegShuntCal != SHUNT_CAL::DEFAULT) {
-            _setReg(SHUNT_CAL::ADDR, _getShadow(SHUNT_CAL::ADDR));
+        if (_shadowRegShuntCal != ShuntCal::defaultVal) {
+            _setReg(ShuntCal::addr, _getShadow(ShuntCal::addr));
         }
-        if (_shadowRegMaskEn != MASK_EN::DEFAULT) {
-            _setReg(MASK_EN::ADDR, _getShadow(MASK_EN::ADDR));
+        if (_shadowRegMaskEn != MaskEn::defaultVal) {
+            _setReg(MaskEn::addr, _getShadow(MaskEn::addr));
         }
     } else {
         _success = false;
@@ -30,47 +30,47 @@ void INA232::begin(TwoWire *wirePort) {
 void INA232::reset() {
     _success = true;
 
-    _setReg(CONFIG::ADDR, _getReg(CONFIG::ADDR) | CONFIG::RST_BIT);
+    _setReg(Config::addr, _getReg(Config::addr) | Config::rstBit);
     if (_success) {
-        _setShadow(CONFIG::ADDR, CONFIG::DEFAULT);
-        _setShadow(SHUNT_CAL::ADDR, SHUNT_CAL::DEFAULT);
-        _setShadow(MASK_EN::ADDR, MASK_EN::DEFAULT);
-        _lastAddress = LAST_ADDR_NOT_SET;
+        _setShadow(Config::addr, Config::defaultVal);
+        _setShadow(ShuntCal::addr, ShuntCal::defaultVal);
+        _setShadow(MaskEn::addr, MaskEn::defaultVal);
+        _lastAddress = lastAddrNotSet;
     }
 }
 
-void INA232::setRange(ADCRANGE range) {
+void INA232::setRange(ADCRange range) {
     _success = true;
 
     // If the range is changing, we need to recalculate the scaling
     bool scaleNeedsUpdate = false;
-    if ((_shadowRegConfig & CONFIG::ADCRANGE_MASK) != (uint16_t)range) {
+    if ((_shadowRegConfig & Config::adcRangeMask) != (uint16_t)range) {
         scaleNeedsUpdate = true;
     }
 
-    uint16_t newConfig = (_getShadow(CONFIG::ADDR) & ~CONFIG::ADCRANGE_MASK) | (uint16_t)range;
-    _setReg(CONFIG::ADDR, newConfig);
+    uint16_t newConfig = (_getShadow(Config::addr) & ~Config::adcRangeMask) | (uint16_t)range;
+    _setReg(Config::addr, newConfig);
     if (_success && scaleNeedsUpdate) {
         _autoScale();
     }
 }
 
-void INA232::setAveraging(AVG averageCount) {
+void INA232::setAveraging(Avg averageCount) {
     _success = true;
-    uint16_t newConfig = (_getShadow(CONFIG::ADDR) & ~CONFIG::AVG_MASK) | (uint16_t)averageCount;
-    _setReg(CONFIG::ADDR, newConfig);
+    uint16_t newConfig = (_getShadow(Config::addr) & ~Config::avgMask) | (uint16_t)averageCount;
+    _setReg(Config::addr, newConfig);
 }
 
-void INA232::setVBusConversionTime(VBUSCT conversionTime) {
+void INA232::setVBusConversionTime(VBusCT conversionTime) {
     _success = true;
-    uint16_t newConfig = (_getShadow(CONFIG::ADDR) & ~CONFIG::VBUSCT_MASK) | (uint16_t)conversionTime;
-    _setReg(CONFIG::ADDR, newConfig);
+    uint16_t newConfig = (_getShadow(Config::addr) & ~Config::vBusCTMask) | (uint16_t)conversionTime;
+    _setReg(Config::addr, newConfig);
 }
 
-void INA232::setShuntConversionTime(VSHCT conversionTime) {
+void INA232::setShuntConversionTime(VShCT conversionTime) {
     _success = true;
-    uint16_t newConfig = (_getShadow(CONFIG::ADDR) & ~CONFIG::VSHCT_MASK) | (uint16_t)conversionTime;
-    _setReg(CONFIG::ADDR, newConfig);
+    uint16_t newConfig = (_getShadow(Config::addr) & ~Config::vshCTMask) | (uint16_t)conversionTime;
+    _setReg(Config::addr, newConfig);
 }
 
 // shuntResistance in Ohms
@@ -83,9 +83,9 @@ void INA232::setScaling(float shuntResistance, float maxCurrent, float maxVBus) 
     // if the low one would overflow given the max current and shunt resistance
     _shuntResistance = shuntResistance;
     if (shuntResistance * maxCurrent > 0.02048) {
-        setRange(ADCRANGE::PM_81_92_MV);
+        setRange(ADCRange::pm81_92mV);
     } else {
-        setRange(ADCRANGE::PM_20_48_MV);
+        setRange(ADCRange::pm20_48mV);
     }
 
     // To avoid overflowing current register, min currentLSB = maxCurrent/(2^15)
@@ -107,64 +107,64 @@ void INA232::setScaling(float shuntResistance, float maxCurrent, float maxVBus) 
 // If _minCurrentLSB and shuntResistance are set, calculate and set the ShuntCal register and _currentLSB
 void INA232::_autoScale() {
     // If range is the lower option, need to divide shunt cal by 4
-    uint16_t range = _getShadow(CONFIG::ADDR) & CONFIG::ADCRANGE_MASK;
-    int shuntCalDiv = (range == (uint16_t)CONFIG::ADCRANGE::PM_20_48_MV) ? 4 : 1;
+    uint16_t range = _getShadow(Config::addr) & Config::adcRangeMask;
+    int shuntCalDiv = (range == (uint16_t)Config::ADCRange::pm20_48mV) ? 4 : 1;
     _vShuntLSB = 0.0000025 / shuntCalDiv;
     if ((_shuntResistance != 0) && (_minCurrentLSB != 0)) {
-        _setReg(SHUNT_CAL::ADDR, std::floor(0.00512 / (_minCurrentLSB * _shuntResistance * shuntCalDiv)));
+        _setReg(ShuntCal::addr, std::floor(0.00512 / (_minCurrentLSB * _shuntResistance * shuntCalDiv)));
         if (_success) {
             // Recalculate currentLSB to account for rounding the cal register. Rounding down the
             // cal register results in a slightly high currentLSB, but it was a minimum anyway, so
             // that's the right direction to go
-            _currentLSB = 0.00512 / (_getShadow(SHUNT_CAL::ADDR) * _shuntResistance * shuntCalDiv);
+            _currentLSB = 0.00512 / (_getShadow(ShuntCal::addr) * _shuntResistance * shuntCalDiv);
         }
     }
 }
 
-void INA232::setConversionMode(MODE conversionMode) {
+void INA232::setConversionMode(Mode conversionMode) {
     _success = true;
-    uint16_t newConfig = (_getShadow(CONFIG::ADDR) & ~CONFIG::MODE_MASK) | (uint16_t)conversionMode;
-    _setReg(CONFIG::ADDR, newConfig);
+    uint16_t newConfig = (_getShadow(Config::addr) & ~Config::modeMask) | (uint16_t)conversionMode;
+    _setReg(Config::addr, newConfig);
 }
 
 void INA232::triggerVBusMeasurement() {
     _success = true;
-    uint16_t newConfig = (_getShadow(CONFIG::ADDR) & ~CONFIG::MODE_MASK) | (uint16_t)CONFIG::MODE::BUSV_TRIG_SINGLE;
-    _setReg(CONFIG::ADDR, newConfig);
+    uint16_t newConfig = (_getShadow(Config::addr) & ~Config::modeMask) | (uint16_t)Config::Mode::busvTrigSingle;
+    _setReg(Config::addr, newConfig);
 }
 
 void INA232::triggerShuntMeasurement() {
     _success = true;
-    uint16_t newConfig = (_getShadow(CONFIG::ADDR) & ~CONFIG::MODE_MASK) | (uint16_t)CONFIG::MODE::SHV_TRIG_SINGLE;
-    _setReg(CONFIG::ADDR, newConfig);
+    uint16_t newConfig = (_getShadow(Config::addr) & ~Config::modeMask) | (uint16_t)Config::Mode::shvTrigSingle;
+    _setReg(Config::addr, newConfig);
 }
 
 void INA232::triggerShuntVBusMeasurement() {
     _success = true;
-    uint16_t newConfig = (_getShadow(CONFIG::ADDR) & ~CONFIG::MODE_MASK) | (uint16_t)CONFIG::MODE::SHV_BUSV_TRIG_SINGLE;
-    _setReg(CONFIG::ADDR, newConfig);
+    uint16_t newConfig = (_getShadow(Config::addr) & ~Config::modeMask) | (uint16_t)Config::Mode::shvBusvTrigSingle;
+    _setReg(Config::addr, newConfig);
 }
 
-bool INA232::newMeasurementAvailable() { return (bool)(_getReg(MASK_EN::ADDR) & MASK_EN::CVRF_BIT); }
+bool INA232::newMeasurementAvailable() { return (bool)(_getReg(MaskEn::addr) & MaskEn::CVRFBit); }
 
 float INA232::getBusVoltage() {
     _success = true;
-    return _getReg(VBUS::ADDR) * _VBUS_LSB;
+    return _getReg(VBus::addr) * _vBusLSB;
 }
 
 float INA232::getShuntVoltage() {
     _success = true;
-    return (int16_t)_getReg(VSHUNT::ADDR) * _vShuntLSB;
+    return (int16_t)_getReg(VShunt::addr) * _vShuntLSB;
 }
 
 float INA232::getCurrent() {
     _success = true;
-    return (int16_t)_getReg(CURRENT::ADDR) * _currentLSB;
+    return (int16_t)_getReg(Current::addr) * _currentLSB;
 }
 
 float INA232::getPower() {
     _success = true;
-    return _getReg(POWER::ADDR) * 32 *_currentLSB;
+    return _getReg(Power::addr) * 32 *_currentLSB;
 }
 
 // Physically read a 2 byte word from the device via I2C
@@ -238,11 +238,11 @@ void INA232::_setReg(uint8_t regAddress, uint16_t data) {
 // Get a pointer to the relevant shadow register if there is one. Returns nullptr otherwise.
 uint16_t *INA232::_shadowPtr(uint8_t regAddress) {
     switch (regAddress) {
-    case CONFIG::ADDR:
+    case Config::addr:
         return &_shadowRegConfig;
-    case SHUNT_CAL::ADDR:
+    case ShuntCal::addr:
         return &_shadowRegShuntCal;
-    case MASK_EN::ADDR:
+    case MaskEn::addr:
         return &_shadowRegMaskEn;
     }
     return nullptr;

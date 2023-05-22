@@ -20,20 +20,20 @@ class INA232 {
         A0_B_SCL = (0b1001011),
     };
 
-    typedef INA232_REG::CONFIG::AVG AVG;
-    typedef INA232_REG::CONFIG::VBUSCT VBUSCT;
-    typedef INA232_REG::CONFIG::VSHCT VSHCT;
+    typedef INA232Reg::Config::Avg Avg;
+    typedef INA232Reg::Config::VBusCT VBusCT;
+    typedef INA232Reg::Config::VShCT VShCT;
 
     // Subset of the available modes - others are singleshot, and used with trigger*() instead
-    enum class MODE : uint16_t {
-        SHUTDOWN = (uint16_t)INA232_REG::CONFIG::MODE::SHUTDOWN,   // Shutdown
-        CONT_SHUNT = (uint16_t)INA232_REG::CONFIG::MODE::CONT_SHV, // Continuous Shunt voltage measurements
-        CONT_BUSV = (uint16_t)INA232_REG::CONFIG::MODE::CONT_BUSV, // Continuous Bus voltage measurements
-        CONT_SHUNT_BUSV = (uint16_t)
-            INA232_REG::CONFIG::MODE::CONT_SHV_BUSV, // Continuous Shunt and Bus voltage measurements (default)
+    enum class Mode : uint16_t {
+        shutdown = (uint16_t)INA232Reg::Config::Mode::shutdown, // Shutdown
+        contShunt = (uint16_t)INA232Reg::Config::Mode::contShV, // Continuous Shunt voltage measurements
+        contBusV = (uint16_t)INA232Reg::Config::Mode::contBusV, // Continuous Bus voltage measurements
+        contShuntBusV =
+            (uint16_t)INA232Reg::Config::Mode::contShvBusV, // Continuous Shunt and Bus voltage measurements (default)
     };
 
-    typedef INA232_REG::CONFIG::ADCRANGE ADCRANGE;
+    typedef INA232Reg::Config::ADCRange ADCRange;
 
     INA232(A0 addr);
 
@@ -47,7 +47,7 @@ class INA232 {
 
     // Sets the measurement range of the current shunt ADC. Voltages greater than this
     // will clip to the maximum measurement range.
-    void setRange(ADCRANGE range);
+    void setRange(ADCRange range);
 
     // Set number of samples to average before storing result to be read
     // in the current, vbus and power registers. Results are averaged in groups, not
@@ -55,15 +55,15 @@ class INA232 {
     // being calculated on the average current and vbus values later.
     //
     // If called before begin(), any change will be applied when begin() is called.
-    void setAveraging(AVG averageCount);
+    void setAveraging(Avg averageCount);
 
     // Sets the time taken to do each VBus measurement. Longer times result in
     // cleaner measurement.
-    void setVBusConversionTime(VBUSCT conversionTime);
+    void setVBusConversionTime(VBusCT conversionTime);
 
     // Sets the time taken to do each VBus measurement. Longer times result in
     // cleaner measurement.
-    void setShuntConversionTime(VSHCT conversionTime);
+    void setShuntConversionTime(VShCT conversionTime);
 
     // Automatically calculate and set ADC range and scaling value for the current and power readings to provide maximum
     // resolution given the shunt resistance, maximum expected current and maximum expected bus voltage.
@@ -74,7 +74,7 @@ class INA232 {
     // between both (default).
     // To use single-shot triggered mode, set this mode to SHUTDOWN and use the
     // triggerVBusMeasurement(), triggerShuntMeasurement(), and triggerShuntVBusMeasurement() methods.
-    void setConversionMode(MODE conversionMode);
+    void setConversionMode(Mode conversionMode);
 
     // Triggers a single-shot VBus measurement.
     void triggerVBusMeasurement();
@@ -113,18 +113,18 @@ class INA232 {
     bool _success;
     TwoWire *_wire;
     bool _hasBegun = false;
-    static constexpr float _VBUS_LSB = 0.0016; // 1.6mV Volts per bit
-    float _vShuntLSB = 0.0000025;          // 2.5uV per bit (with larger ADCRange)
-    float _currentLSB = 0;                 // Amps per bit
+    static constexpr float _vBusLSB = 0.0016; // 1.6mV Volts per bit
+    float _vShuntLSB = 0.0000025;              // 2.5uV per bit (with larger ADCRange)
+    float _currentLSB = 0;                     // Amps per bit
     float _minCurrentLSB = 0;
     float _shuntResistance = 0;
 
-    uint16_t _shadowRegConfig = INA232_REG::CONFIG::DEFAULT;
-    uint16_t _shadowRegShuntCal = INA232_REG::SHUNT_CAL::DEFAULT;
-    uint16_t _shadowRegMaskEn = INA232_REG::MASK_EN::DEFAULT;
+    uint16_t _shadowRegConfig = INA232Reg::Config::defaultVal;
+    uint16_t _shadowRegShuntCal = INA232Reg::ShuntCal::defaultVal;
+    uint16_t _shadowRegMaskEn = INA232Reg::MaskEn::defaultVal;
 
-    static constexpr uint8_t LAST_ADDR_NOT_SET = 0xFF;
-    uint8_t _lastAddress = LAST_ADDR_NOT_SET;
+    static constexpr uint8_t lastAddrNotSet = 0xFF;
+    uint8_t _lastAddress = lastAddrNotSet;
 
     void _autoScale();
 
