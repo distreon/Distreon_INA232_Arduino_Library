@@ -40,27 +40,27 @@ namespace Config {
     // VBus Conversion Time. R/W. Sets the conversion time of the VBUS measurement.
     const uint16_t vBusCTMask = 0b111 << 6;
     enum class VBusCT : uint16_t {
-        T_140US = 0b000 << 6,  // 140us sample time
-        T_204US = 0b001 << 6,  // 204us sample time
-        T_332US = 0b010 << 6,  // 332us sample time
-        T_588US = 0b011 << 6,  // 588us sample time
-        T_1100US = 0b100 << 6, // 1100us sample time (default)
-        T_2116US = 0b101 << 6, // 2116us sample time
-        T_4156US = 0b110 << 6, // 4156us sample time
-        T_8244US = 0b111 << 6, // 8244us sample time
+        t140us = 0b000 << 6,  // 140us sample time
+        t204us = 0b001 << 6,  // 204us sample time
+        t332us = 0b010 << 6,  // 332us sample time
+        t588us = 0b011 << 6,  // 588us sample time
+        t1100us = 0b100 << 6, // 1100us sample time (default)
+        t2116us = 0b101 << 6, // 2116us sample time
+        t4156us = 0b110 << 6, // 4156us sample time
+        t8244us = 0b111 << 6, // 8244us sample time
     };
 
     // VShunt Conversion Time. R/W. Sets the conversion time of the SHUNT measurement.
     const uint16_t vshCTMask = 0b111 << 3;
     enum class VShCT : uint16_t {
-        T_140US = 0b000 << 3,  // 140us sample time
-        T_204US = 0b001 << 3,  // 204us sample time
-        T_332US = 0b010 << 3,  // 332us sample time
-        T_588US = 0b011 << 3,  // 588us sample time
-        T_1100US = 0b100 << 3, // 1100us sample time (default)
-        T_2116US = 0b101 << 3, // 2116us sample time
-        T_4156US = 0b110 << 3, // 4156us sample time
-        T_8244US = 0b111 << 3, // 8244us sample time
+        t140us = 0b000 << 3,  // 140us sample time
+        t204us = 0b001 << 3,  // 204us sample time
+        t332us = 0b010 << 3,  // 332us sample time
+        t588us = 0b011 << 3,  // 588us sample time
+        t1100us = 0b100 << 3, // 1100us sample time (default)
+        t2116us = 0b101 << 3, // 2116us sample time
+        t4156us = 0b110 << 3, // 4156us sample time
+        t8244us = 0b111 << 3, // 8244us sample time
     };
 
     // Operating Mode. R/W. Modes can be selected to operate the device either in
