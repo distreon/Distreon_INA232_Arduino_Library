@@ -73,6 +73,68 @@ void INA232::setShuntConversionTime(VShCT conversionTime) {
     _setReg(Config::addr, newConfig);
 }
 
+// Converts the Average sample count bitfield to the actual number of samples
+int INA232::_avgFieldToCount(Config::Avg averageCount) {
+    switch (averageCount) {
+    case Config::Avg::s1:
+        return 1;
+    case Config::Avg::s4:
+        return 4;
+    case Config::Avg::s16:
+        return 16;
+    case Config::Avg::s64:
+        return 64;
+    case Config::Avg::s128:
+        return 128;
+    case Config::Avg::s256:
+        return 256;
+    case Config::Avg::s512:
+        return 512;
+    case Config::Avg::s1024:
+        return 1024;
+    }
+    return 0;
+}
+
+// Converts the CT bitfield to an actual time in seconds
+float INA232::_ctFieldToTime(Config::VBusCT conversionTime) {
+    switch (conversionTime) {
+    case Config::VBusCT::t140us:
+        return 0.000140;
+    case Config::VBusCT::t204us:
+        return 0.000204;
+    case Config::VBusCT::t332us:
+        return 0.000332;
+    case Config::VBusCT::t588us:
+        return 0.000588;
+    case Config::VBusCT::t1100us:
+        return 0.001100;
+    case Config::VBusCT::t2116us:
+        return 0.002116;
+    case Config::VBusCT::t4156us:
+        return 0.004156;
+    case Config::VBusCT::t8244us:
+        return 0.008244;
+    }
+    return 5;
+}
+
+float INA232::_ctFieldToTime(Config::VShCT conversionTime) {
+    return _ctFieldToTime((Config::VBusCT)((uint16_t)conversionTime << 3));
+}
+
+float INA232::getVBusMeasurementTime() {
+    int samples = _avgFieldToCount((Config::Avg)(_getShadow(Config::addr) & Config::avgMask));
+    float convTime = _ctFieldToTime((Config::VBusCT)(_getShadow(Config::addr) & Config::vBusCTMask));
+    return samples * convTime;
+}
+
+float INA232::getShuntMeasurementTime() {
+    int samples = _avgFieldToCount((Config::Avg)(_getShadow(Config::addr) & Config::avgMask));
+    float convTime = _ctFieldToTime((Config::VShCT)(_getShadow(Config::addr) & Config::vshCTMask));
+    return samples * convTime;
+}
+
 // shuntResistance in Ohms
 // maxCurrent in Amps
 // maxVbus in Volts
@@ -164,8 +226,18 @@ float INA232::getCurrent() {
 
 float INA232::getPower() {
     _success = true;
-    return _getReg(Power::addr) * 32 *_currentLSB;
+    return _getReg(Power::addr) * 32 * _currentLSB;
 }
+
+float INA232::getBusVoltagePrecision() { return _vBusLSB; }
+
+float INA232::getShuntVoltagePrecision() { return _vShuntLSB; }
+
+float INA232::getCurrentPrecision() { return _currentLSB; }
+
+float INA232::getPowerPrecision() { return 32 * _currentLSB; }
+
+bool INA232::success() { return _success; }
 
 // Physically read a 2 byte word from the device via I2C
 uint16_t INA232::_readWord(uint8_t address) {

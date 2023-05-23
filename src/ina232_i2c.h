@@ -65,6 +65,19 @@ class INA232 {
     // cleaner measurement.
     void setShuntConversionTime(VShCT conversionTime);
 
+    int _avgFieldToCount(INA232Reg::Config::Avg averageCount);
+
+    float _ctFieldToTime(INA232Reg::Config::VBusCT conversionTime);
+    float _ctFieldToTime(INA232Reg::Config::VShCT conversionTime);
+
+    // Returns the approximate time it will take to get a new VBus measurement in seconds
+    // (the conversion time * the number of samples to be averaged)
+    float getVBusMeasurementTime();
+
+    // Returns the approximate time it will take to get a new Shunt measurement in seconds
+    // (the conversion time * the number of samples to be averaged)
+    float getShuntMeasurementTime();
+
     // Automatically calculate and set ADC range and scaling value for the current and power readings to provide maximum
     // resolution given the shunt resistance, maximum expected current and maximum expected bus voltage.
     void setScaling(float shuntR, float maxCurrent, float maxVBus);
@@ -95,15 +108,27 @@ class INA232 {
     // result. If only new measurements are wanted, use `newMeasurementAvailable()` to check first.
     float getShuntVoltage();
 
-    // Reads out the latest current value, as calculated from the current shunt voltage reading.
+    // Reads out the latest current value in Amps, as calculated from the current shunt voltage reading.
     // If averaging is set up, this is the latest averaged result.
     // If only new measurements are wanted, use `newMeasurementAvailable()` to check first.
     float getCurrent();
 
-    // Reads out the latest power value, as calculated from the current shunt voltage and VBus readings.
+    // Reads out the latest power value in Watts, as calculated from the current shunt voltage and VBus readings.
     // If averaging is set up, this is the latest averaged result.
     // If only new measurements are wanted, use `newMeasurementAvailable()` to check first.
     float getPower();
+
+    // Returns the minimum increment measurable in the bus voltage (LSB)
+    float getBusVoltagePrecision();
+
+    // Returns the minimum increment measurable in the shunt voltage (LSB)
+    float getShuntVoltagePrecision();
+
+    // Returns the minimum increment measurable in the current shunt (LSB)
+    float getCurrentPrecision();
+
+    // Returns the minimum increment measurable in the power calculation (LSB)
+    float getPowerPrecision();
 
     // Returns a value representing the success or failure of the last method called on this device
     bool success();
@@ -114,8 +139,8 @@ class INA232 {
     TwoWire *_wire;
     bool _hasBegun = false;
     static constexpr float _vBusLSB = 0.0016; // 1.6mV Volts per bit
-    float _vShuntLSB = 0.0000025;              // 2.5uV per bit (with larger ADCRange)
-    float _currentLSB = 0;                     // Amps per bit
+    float _vShuntLSB = 0.0000025;             // 2.5uV per bit (with larger ADCRange)
+    float _currentLSB = 0;                    // Amps per bit
     float _minCurrentLSB = 0;
     float _shuntResistance = 0;
 
