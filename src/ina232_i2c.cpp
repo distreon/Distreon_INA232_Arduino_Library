@@ -95,7 +95,7 @@ void INA232::setScaling(float shuntResistance, float maxCurrent, float maxVBus) 
     //                                       min currentLSB = maxPower/(2^21)
 
     float maxPower = maxCurrent * maxVBus;
-    _minCurrentLSB = std::min((maxCurrent / (2 ^ 15)), (maxPower / (2 ^ 21)));
+    _minCurrentLSB = std::max((maxCurrent / ((long)1 << 15)), (maxPower / ((long)1 << 21)));
 
     // Setting the shunt cal register and _currentLSB is broken out to allow it to be redone if
     // the ADC range is changed
