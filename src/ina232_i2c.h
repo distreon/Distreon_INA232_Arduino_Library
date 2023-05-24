@@ -65,11 +65,6 @@ class INA232 {
     // cleaner measurement.
     void setShuntConversionTime(VShCT conversionTime);
 
-    int _avgFieldToCount(INA232Reg::Config::Avg averageCount);
-
-    float _ctFieldToTime(INA232Reg::Config::VBusCT conversionTime);
-    float _ctFieldToTime(INA232Reg::Config::VShCT conversionTime);
-
     // Returns the approximate time it will take to get a new VBus measurement in seconds
     // (the conversion time * the number of samples to be averaged)
     float getVBusMeasurementTime();
@@ -147,6 +142,10 @@ class INA232 {
     uint16_t _shadowRegConfig = INA232Reg::Config::defaultVal;
     uint16_t _shadowRegShuntCal = INA232Reg::ShuntCal::defaultVal;
     uint16_t _shadowRegMaskEn = INA232Reg::MaskEn::defaultVal;
+
+    int _avgFieldToCount(INA232Reg::Config::Avg averageCount);
+    float _ctFieldToTime(INA232Reg::Config::VBusCT conversionTime);
+    float _ctFieldToTime(INA232Reg::Config::VShCT conversionTime);
 
     static constexpr uint8_t lastAddrNotSet = 0xFF;
     uint8_t _lastAddress = lastAddrNotSet;
