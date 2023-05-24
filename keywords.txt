@@ -1,0 +1,82 @@
+#######################################
+# Syntax Coloring Map For INA232
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+INA232	KEYWORD1
+A0	KEYWORD1
+Avg
+VBusCT
+VShCT
+Mode
+ADCRange
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin	KEYWORD2
+reset	KEYWORD2
+setRange	KEYWORD2
+setAveraging	KEYWORD2
+setVBusConversionTime	KEYWORD2
+setShuntConversionTime	KEYWORD2
+getVBusMeasurementTime	KEYWORD2
+getShuntMeasurementTime	KEYWORD2
+setScaling	KEYWORD2
+setConversionMode	KEYWORD2
+triggerVBusMeasurement	KEYWORD2
+triggerShuntMeasurement	KEYWORD2
+triggerShuntVBusMeasurement	KEYWORD2
+newMeasurementAvailable	KEYWORD2
+getBusVoltage	KEYWORD2
+getShuntVoltage	KEYWORD2
+getCurrent	KEYWORD2
+getPower	KEYWORD2
+getBusVoltagePrecision	KEYWORD2
+getShuntVoltagePrecision	KEYWORD2
+getCurrentPrecision	KEYWORD2
+getPowerPrecision	KEYWORD2
+success	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+A0_A_GND    LITERAL1
+A0_A_VSS    LITERAL1
+A0_A_SDA    LITERAL1
+A0_A_SCL    LITERAL1
+A0_B_GND    LITERAL1
+A0_B_VSS    LITERAL1
+A0_B_SDA    LITERAL1
+A0_B_SCL    LITERAL1
+s1  LITERAL1
+s4  LITERAL1
+s16 LITERAL1
+s64 LITERAL1
+s128    LITERAL1
+s256    LITERAL1
+s512    LITERAL1
+s1024   LITERAL1
+t140us  LITERAL1
+t204us  LITERAL1
+t332us  LITERAL1
+t588us  LITERAL1
+t1100us LITERAL1
+t2116us LITERAL1
+t4156us LITERAL1
+t8244us LITERAL1
+pm81_92mV   LITERAL1
+pm20_48mV   LITERAL1
+shutdown	LITERAL1
+contShV	LITERAL1
+contBusV	LITERAL1
+contShuntBusV	LITERAL1
+
+#######################################
+# Blue Constants (LITERAL2, Constants, RESERVED_WORD_2)
+#######################################

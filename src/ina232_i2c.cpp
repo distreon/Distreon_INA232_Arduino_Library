@@ -1,5 +1,5 @@
-#include <algorithm>
 #include <ina232_i2c.h>
+#include <algorithm>
 
 using namespace INA232Reg;
 
